@@ -1,8 +1,8 @@
 import json
 import numpy as np
+import struct
 
 def dump(data, filename):
-    import struct
     points_length = len(data)
 
     version = 1
@@ -58,3 +58,4 @@ def dump(data, filename):
                 colors[:, i] = data[:, 3]
         colors *= 256
         fp.write(colors.astype('<B').tobytes())
+    # TODO return status
