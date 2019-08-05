@@ -10,6 +10,7 @@ class LasTarget(luigi.LocalTarget):
     def load(self):
         data = lasutil.LasFile(self.path)
         if self.mirror_x:
+            # TODO move to lasFile class
             data.obj.points['point']['X'] *= -1
         return data
 

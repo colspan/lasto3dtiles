@@ -18,7 +18,7 @@ class PlyFile():
         del self.obj
 
     def voxel_down_sample(self, voxel_size=0.1):
-        self.obj = open3d.voxel_down_sample(self.obj, voxel_size)
+        self.obj = open3d.geometry.voxel_down_sample(self.obj, voxel_size=voxel_size)
 
     def save(self, filename):
         return dump(self.obj, filename)
