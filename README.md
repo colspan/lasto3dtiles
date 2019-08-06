@@ -10,7 +10,7 @@ pip install .
 ## example
 
 ```bash
-lasto3dtiles LasSetTo3dTiles --input-dirname /path/to/lasdir --point-map-def /path/to/pointmap.json --workers 1 --voxel-size 0.05 --skip-rate 0.99
+lasto3dtiles LasSetTo3dTiles --input-dirname /path/to/lasdir --point-map-def /path/to/pointmap.json --output-dirname /path/to/3dtiles --workers 4 --voxel-size 0.05 --skip-rate 0.5
 ```
 
 ### pointmap.json 

@@ -31,6 +31,14 @@ class LasFile():
         # ptdata = np.vstack(
         #     [point_records['point'][col].astype(np.float64) for col in colmap]).T
 
+        # apply scale and offset for xy
+        for i in range(3):
+            ptdata[:, i] *= self.obj.header.scale[i]
+            ptdata[:, i] += self.obj.header.offset[i]
+
+        # scale colors
+        ptdata[:, 3:] /= 65536.0
+
         if 0 < skip_rate < 1.0:
             idx = np.random.randint(
                 ptdata.shape[0], size=int(ptdata.shape[0]*(1-skip_rate)))

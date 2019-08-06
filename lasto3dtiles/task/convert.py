@@ -30,40 +30,53 @@ class LasSetTo3dTiles(luigi.Task):
             os.path.join(self.input_dirname, '*.[lL][aA][sS]'))
 
     def requires(self):
-        return map(lambda x: LasToPnts(x, mirror_x=self.mirror_x, voxel_size=self.voxel_size, skip_rate=self.skip_rate), self.input_files)
+        return map(lambda x: LasToPnts(x,
+                                       mirror_x=self.mirror_x,
+                                       voxel_size=self.voxel_size,
+                                       output_dir=self.output_dir,
+                                       skip_rate=self.skip_rate), self.input_files)
 
     def output(self):
-        return luigi.LocalTarget(os.path.join(self.output_dir, 'tileset.json')) # TODO set relative path
+        # TODO set relative path
+        return luigi.LocalTarget(os.path.join(self.output_dir, 'tileset.json'))
 
     def run(self):
         height_range = (0, 50)  # TODO parameterize
 
         # 各LASファイルの範囲を読む
         las_targets = [x.requires().output().load() for x in self.requires()]
-        x_mins = [np.min(d.obj.points['point']['X']) for d in las_targets]
-        x_maxs = [np.max(d.obj.points['point']['X']) for d in las_targets]
-        y_mins = [np.min(d.obj.points['point']['Y']) for d in las_targets]
-        y_maxs = [np.max(d.obj.points['point']['Y']) for d in las_targets]
+        x_mins = [np.min(d.obj.X * d.obj.header.scale[0] +
+                         d.obj.header.offset[0]) for d in las_targets]
+        x_maxs = [np.max(d.obj.X * d.obj.header.scale[0] +
+                         d.obj.header.offset[0]) for d in las_targets]
+        y_mins = [np.min(d.obj.Y * d.obj.header.scale[1] +
+                         d.obj.header.offset[1]) for d in las_targets]
+        y_maxs = [np.max(d.obj.Y * d.obj.header.scale[1] +
+                         d.obj.header.offset[1]) for d in las_targets]
 
         # 点群と緯度経度の対応を読む
         with open(self.point_map_def, 'r') as f_input:
             point_map = json.load(f_input)
 
+        # print(point_map)
         src = np.asarray([[x, y, 0, 1]
                           for x, y in point_map['xy']])  # TODO set height from las
 
         dst_xyz = np.asarray([[v * 1000 for v in coordutil.deg_to_xyz(
             lat, lon, coordutil.get_height(lat, lon, nan=0) - 0.020)] + [1] for lon, lat in point_map['lonlat']])
+        # print(dst_xyz)
         mat_xyz = coordutil.estimate_transform_matrix(
             src[:, 0:3], dst_xyz[:, 0:3])
 
         # Tangent Plane で線形近似するための値域を取得する
         range_x = [min(x_mins), max(x_maxs)]
         range_y = [min(y_mins), max(y_maxs)]
+        # print(x_mins, x_maxs, y_mins, y_maxs)
         domain_min = np.dot(
             np.array([range_x[0], range_y[0], 0, 1]), mat_xyz)
         domain_max = np.dot(
             np.array([range_x[1], range_y[1], 0, 1]), mat_xyz)
+        # print(domain_min, domain_max)
 
         import pymap3d
         domain_lonlat_min = pymap3d.ecef2geodetic(
@@ -72,6 +85,7 @@ class LasSetTo3dTiles(luigi.Task):
             *tuple(domain_max[0:3].tolist()))
         domain_lon = [domain_lonlat_min[1], domain_lonlat_max[1]]
         domain_lat = [domain_lonlat_min[0], domain_lonlat_max[0]]
+        # print(domain_lon, domain_lat)
 
         def getGeometricError(latitude, zoom):
             return 40075016.686 * \
@@ -97,7 +111,7 @@ class LasSetTo3dTiles(luigi.Task):
             south, west, _ = domain_latlon_min
             north, east, _ = domain_latlon_max
 
-            target_tile = pnts_task.output().path
+            target_tile = os.path.basename(pnts_task.output().path)
 
             tileset_def = {
                 'boundingVolume': {
