@@ -63,5 +63,6 @@ lasto3dtiles LasSetTo3dTiles --input-dirname /path/to/lasdir --point-map-def /pa
 
 ## TODO
 
- - generate tileset.json
- - make `LasToPnts` task equality 
+ - add 2d aerial image renderer
+ - add point map annotator
+
