@@ -1,3 +1,4 @@
+import numpy as np
 from math import sin, cos, tan, radians, pi, log, atan, sinh, degrees, sqrt
 
 
@@ -136,7 +137,7 @@ class ProjectRangeDomain(object):
             self.diff_lat * self.diff_y + min(self.range_y),
         ]
 
-import numpy as np
+
 def get_height(lat_deg, lon_deg, nan=np.NAN):
     # return 0 # DEBUG
     import os

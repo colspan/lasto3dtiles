@@ -2,6 +2,7 @@ import json
 import numpy as np
 import struct
 
+
 def dump(data, filename):
     points_length = len(data)
 
