@@ -1,3 +1,4 @@
+import glob
 import json
 import luigi
 import open3d
@@ -6,6 +7,27 @@ import os
 import lasto3dtiles.format.ply as plyutil
 from lasto3dtiles.task.loadlas import LoadLas
 from lasto3dtiles.util.rasterize import ndarray2img
+
+
+class RasterizeLasSet(luigi.WrapperTask):
+    input_dirname = luigi.Parameter()
+    output_dir = luigi.Parameter(default=os.path.join('var', 'rasterized'))
+    voxel_size = luigi.FloatParameter(default=0.1)
+    skip_rate = luigi.FloatParameter(default=0.1)
+    zoom = luigi.IntParameter(default=10)
+    mirror_x = luigi.BoolParameter(default=False)
+
+    def __init__(self, *args, **kwargs):
+        super(RasterizeLasSet, self).__init__(*args, **kwargs)
+        self.input_files = glob.glob(
+            os.path.join(self.input_dirname, '*.[lL][aA][sS]'))
+
+    def requires(self):
+        return map(lambda x: RasterizeLas(x,
+                                          mirror_x=self.mirror_x,
+                                          voxel_size=self.voxel_size,
+                                          output_dir=self.output_dir,
+                                          skip_rate=self.skip_rate), self.input_files)
 
 
 class RasterizeLas(luigi.Task):
