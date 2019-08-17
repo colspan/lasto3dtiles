@@ -12,7 +12,7 @@ import lasto3dtiles.task.loadlas as loadlas
 import lasto3dtiles.format.las as lasutil
 import lasto3dtiles.format.ply as plyutil
 import lasto3dtiles.format.pnts as pntsutil
-import lasto3dtiles.coordinate as coordutil
+import lasto3dtiles.util.coordinate as coordutil
 
 
 class LasSetTo3dTiles(luigi.Task):
