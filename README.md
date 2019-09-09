@@ -9,8 +9,15 @@ pip install .
 
 ## example
 
+
+### rasterize
 ```bash
-lasto3dtiles LasSetTo3dTiles --input-dirname /path/to/lasdir --point-map-def /path/to/pointmap.json --output-dirname /path/to/3dtiles --workers 4 --voxel-size 0.05 --skip-rate 0.5
+lasto3dtiles RasterizeLasSet --input-dir /path/to/lasdir --output-dir /path/to/rasterized --workers 4 --voxel-size 0.05 --skip-rate 0.5
+```
+
+### convert to 3dtiles pnts format
+```bash
+lasto3dtiles LasSetTo3dTiles --input-dir /path/to/lasdir --point-map-def /path/to/pointmap.json --output-dir /path/to/3dtiles --workers 4 --voxel-size 0.05 --skip-rate 0.5
 ```
 
 ### pointmap.json 
@@ -63,6 +70,5 @@ lasto3dtiles LasSetTo3dTiles --input-dirname /path/to/lasdir --point-map-def /pa
 
 ## TODO
 
- - add 2d aerial image renderer
  - add point map annotator
 
