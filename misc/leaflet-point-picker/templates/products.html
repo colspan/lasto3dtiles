@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <title>工事一覧</title>
+</head>
+<body>
+    <h1>工事一覧</h1>
+    <ul id="products">
+    {% for item in var.products %}
+        <li><a href="{{ item.href }}">{{ item.caption }}</a></li>
+    {% endfor %}
+    </ul>
+</body>
+</html>

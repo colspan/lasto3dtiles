@@ -67,8 +67,3 @@ lasto3dtiles LasSetTo3dTiles --input-dir /path/to/lasdir --point-map-def /path/t
 }
 
 ```
-
-## TODO
-
- - add point map annotator
-
