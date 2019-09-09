@@ -9,8 +9,8 @@ from lasto3dtiles.task.loadlas import LoadLas
 from lasto3dtiles.util.rasterize import ndarray2img
 
 
-class RasterizeLasSet(luigi.WrapperTask):
-    input_dirname = luigi.Parameter()
+class RasterizeLasSet(luigi.Task):
+    input_dir = luigi.Parameter()
     output_dir = luigi.Parameter(default=os.path.join('var', 'rasterized'))
     voxel_size = luigi.FloatParameter(default=0.1)
     skip_rate = luigi.FloatParameter(default=0.1)
@@ -20,7 +20,7 @@ class RasterizeLasSet(luigi.WrapperTask):
     def __init__(self, *args, **kwargs):
         super(RasterizeLasSet, self).__init__(*args, **kwargs)
         self.input_files = glob.glob(
-            os.path.join(self.input_dirname, '*.[lL][aA][sS]'))
+            os.path.join(self.input_dir, '*.[lL][aA][sS]'))
 
     def requires(self):
         return map(lambda x: RasterizeLas(x,
@@ -28,6 +28,23 @@ class RasterizeLasSet(luigi.WrapperTask):
                                           voxel_size=self.voxel_size,
                                           output_dir=self.output_dir,
                                           skip_rate=self.skip_rate), self.input_files)
+
+    def output(self):
+        return luigi.LocalTarget(os.path.join(self.output_dir, 'area.json'))
+
+    def run(self):
+        images = []
+        for input in self.input():
+            with input['json'].open('r') as f_input:
+                data = json.load(f_input)
+            images.append({
+                'shape': data['shape'],
+                'range_x': [min(data['xx']), max(data['xx'])],
+                'range_y': [min(data['yy']), max(data['yy'])],
+                'path': os.path.basename(input['image'].path),
+            })
+        with self.output().open('w') as f_output:
+            json.dump(images, f_output, ensure_ascii=False)
 
 
 class RasterizeLas(luigi.Task):
