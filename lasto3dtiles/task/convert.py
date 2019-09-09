@@ -16,18 +16,18 @@ import lasto3dtiles.util.coordinate as coordutil
 
 
 class LasSetTo3dTiles(luigi.Task):
-    input_dirname = luigi.Parameter()
+    input_dir = luigi.Parameter()
     point_map_def = luigi.Parameter()
     output_dir = luigi.Parameter(default=os.path.join('var', '3dtiles'))
     voxel_size = luigi.FloatParameter(default=0.1)
     skip_rate = luigi.FloatParameter(default=0.1)
-    zoom = luigi.IntParameter(default=10)
     mirror_x = luigi.BoolParameter(default=False)
+    shift_z = luigi.FloatParameter(default=0)
 
     def __init__(self, *args, **kwargs):
         super(LasSetTo3dTiles, self).__init__(*args, **kwargs)
         self.input_files = glob.glob(
-            os.path.join(self.input_dirname, '*.[lL][aA][sS]'))
+            os.path.join(self.input_dir, '*.[lL][aA][sS]'))
 
     def requires(self):
         return map(lambda x: LasToPnts(x,
@@ -62,8 +62,9 @@ class LasSetTo3dTiles(luigi.Task):
         src = np.asarray([[x, y, 0, 1]
                           for x, y in point_map['xy']])  # TODO set height from las
 
+        z_offset = 0.020 + self.shift_z
         dst_xyz = np.asarray([[v * 1000 for v in coordutil.deg_to_xyz(
-            lat, lon, coordutil.get_height(lat, lon, nan=0) - 0.020)] + [1] for lon, lat in point_map['lonlat']])
+            lat, lon, coordutil.get_height(lat, lon, nan=0) - z_offset)] + [1] for lon, lat in point_map['lonlat']])
         # print(dst_xyz)
         mat_xyz = coordutil.estimate_transform_matrix(
             src[:, 0:3], dst_xyz[:, 0:3])
@@ -86,10 +87,6 @@ class LasSetTo3dTiles(luigi.Task):
         domain_lon = [domain_lonlat_min[1], domain_lonlat_max[1]]
         domain_lat = [domain_lonlat_min[0], domain_lonlat_max[0]]
         # print(domain_lon, domain_lat)
-
-        def getGeometricError(latitude, zoom):
-            return 40075016.686 * \
-                math.cos(domain_lat[0] / 180.0 * math.pi) / (2**zoom)
 
         def getTileChildren(pnts_task):
             las_target = pnts_task.requires().output().load()
@@ -116,16 +113,21 @@ class LasSetTo3dTiles(luigi.Task):
             tileset_def = {
                 'boundingVolume': {
                     'region': [
-                        west / 180.0 * math.pi,  # lon_min
-                        south / 180.0 * math.pi,  # lat_min
-                        east / 180.0 * math.pi,  # lon_max
-                        north / 180.0 * math.pi,  # lat_max
+                        # TODO calcurate accurate bounding box
+                        # west / 180.0 * math.pi,  # lon_min
+                        # south / 180.0 * math.pi,  # lat_min
+                        # east / 180.0 * math.pi,  # lon_max
+                        # north / 180.0 * math.pi,  # lat_max
+                        min(domain_lon) / 180.0 * math.pi,  # lon_min
+                        min(domain_lat) / 180.0 * math.pi,  # lat_min
+                        max(domain_lon) / 180.0 * math.pi,  # lon_max
+                        max(domain_lat) / 180.0 * math.pi,  # lat_max
                         min(height_range),
                         max(height_range),
                     ]
                 },
-                'geometricError': getGeometricError(south, self.zoom),
-                'refine': 'REPLACE',
+                'geometricError': 0,
+                'refine': 'ADD',
                 'content': {
                     'url': target_tile,
                 },
@@ -144,7 +146,7 @@ class LasSetTo3dTiles(luigi.Task):
                     max(height_range),
                 ]
             },
-            'geometricError': getGeometricError(domain_lat[0], self.zoom),
+            'geometricError': 50,
             'refine': 'REPLACE',
             'children': [getTileChildren(x) for x in self.requires()],
         }
@@ -152,7 +154,6 @@ class LasSetTo3dTiles(luigi.Task):
             'asset': {
                 'version': '0.0'
             },
-            'geometricError': 100,
             'root': tileset_root,
         }
         with self.output().open('w') as f_output:
