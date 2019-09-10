@@ -15,7 +15,17 @@ function getHashVars() {
     return vars;
   }
 
-var viewer = new Cesium.Viewer('cesiumContainer');
+var viewer = new Cesium.Viewer('cesiumContainer', {
+    imageryProvider: new Cesium.createOpenStreetMapImageryProvider({
+      url: 'https://cyberjapandata.gsi.go.jp/xyz/ort/',
+      fileExtension: 'jpg',
+      maximumLevel: 18,
+      credit: new Cesium.Credit('地理院タイル', '', 'https://maps.gsi.go.jp/development/ichiran.html')
+    }),
+    baseLayerPicker: false,
+    geocoder: false,
+    homeButton: false
+  });
 
 var hashVars = getHashVars();
 var targetDir = 'default';
