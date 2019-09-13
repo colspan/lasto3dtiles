@@ -16,16 +16,24 @@ function getHashVars() {
   }
 
 var viewer = new Cesium.Viewer('cesiumContainer', {
-    imageryProvider: new Cesium.createOpenStreetMapImageryProvider({
-      url: 'https://cyberjapandata.gsi.go.jp/xyz/ort/',
-      fileExtension: 'jpg',
-      maximumLevel: 18,
-      credit: new Cesium.Credit('地理院タイル', '', 'https://maps.gsi.go.jp/development/ichiran.html')
-    }),
+    imageryProvider: null,
     baseLayerPicker: false,
     geocoder: false,
     homeButton: false
   });
+
+var globe = viewer.scene.globe;
+globe.imageryLayers.removeAll();
+globe.baseColor = Cesium.Color.fromCssColorString('#000000');
+
+var gsiOrt = globe.imageryLayers.addImageryProvider(new Cesium.createOpenStreetMapImageryProvider({
+  url: 'https://cyberjapandata.gsi.go.jp/xyz/ort/',
+  fileExtension: 'jpg',
+  maximumLevel: 18,
+  credit: new Cesium.Credit('地理院タイル', '', 'https://maps.gsi.go.jp/development/ichiran.html')
+}));
+gsiOrt.alpha = 0.5;
+gsiOrt.brightness = 0.5;
 
 var hashVars = getHashVars();
 var targetDir = 'default';
