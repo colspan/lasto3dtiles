@@ -3,8 +3,6 @@ require('./css/main.css');
 
 var Cesium = require('cesium/Cesium');
 
-Cesium.Ion.defaultAccessToken = 'add your token';
-
 function getHashVars() {
     var vars = {};
     var hashes = window.location.href.slice(window.location.href.indexOf('#') + 1).split('&');
