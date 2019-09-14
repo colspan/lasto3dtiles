@@ -8,6 +8,21 @@ setup(
         'lasto3dtiles',
         'lasto3dtiles.format',
         'lasto3dtiles.task',
+        'lasto3dtiles.util',
+    ],
+    install_requires=[
+        'cython',
+        'scipy',
+        'laspy',
+        'luigi',
+        'matplotlib',
+        'numpy',
+        'pandas',
+        'pillow',
+        'pymap3d',
+        'open3d-python',
+        'requests',
+        'transforms3d',
     ],
     entry_points={
         'console_scripts': [
