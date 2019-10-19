@@ -1,3 +1,9 @@
+# -*- coding:utf-8 -*-
+
+"""
+Las to 3dtiles converter
+"""
+
 import glob
 import json
 import luigi
@@ -16,13 +22,59 @@ import lasto3dtiles.util.coordinate as coordutil
 
 
 class LasSetTo3dTiles(luigi.Task):
+    """
+    Convert multiple LAS files to 3dtiles format.
+
+    Args:
+        :param input_dir: Input directory that containes LAS files (format 1.0)
+        :param point_map_def: JSON file that defines corresponding points between LAS files' local coordinates (``xy``) and geographic longitude / latitude (``lonlat``)
+
+        E.g.
+        ...code-block:: json
+            {
+                "xy": [
+                    [
+                    -71016.5,
+                    -142633.0625
+                    ],
+                    [
+                    -70975.96875,
+                    -142653.90625
+                    ],
+                    [
+                    -70978.46875,
+                    -142668.03125
+                    ]
+                ],
+                "lonlat": [
+                    [
+                    137.7247106283903,
+                    34.711804475805295
+                    ],
+                    [
+                    137.725145816803,
+                    34.711618717192835
+                    ],
+                    [
+                    137.7251169830561,
+                    34.71148973322244
+                    ]
+                ]
+            }
+
+        :param output_dir: Output directory for converted 3Dtiles format files
+        :param voxel_size: Voxel size for resampling. Default value is ``0.1``.
+        :param skip_rate: Skip rate for fetching points from LAS files. Default value is ``0.1``.
+        :param mirror_x: Mirror x axis for right hand system (``xy`` in ``point_map_def`` is supporsed to be mirrored)
+        :param shift_z: Offset for z axis. Unit is kilo meter. Default is ``0.020``.
+    """
     input_dir = luigi.Parameter()
     point_map_def = luigi.Parameter()
     output_dir = luigi.Parameter(default=os.path.join('var', '3dtiles'))
     voxel_size = luigi.FloatParameter(default=0.1)
     skip_rate = luigi.FloatParameter(default=0.1)
     mirror_x = luigi.BoolParameter(default=False)
-    shift_z = luigi.FloatParameter(default=0)
+    shift_z = luigi.FloatParameter(default=0.020)
 
     def __init__(self, *args, **kwargs):
         super(LasSetTo3dTiles, self).__init__(*args, **kwargs)
@@ -62,7 +114,7 @@ class LasSetTo3dTiles(luigi.Task):
         src = np.asarray([[x, y, 0, 1]
                           for x, y in point_map['xy']])  # TODO set height from las
 
-        z_offset = 0.020 + self.shift_z
+        z_offset = self.shift_z
         dst_xyz = np.asarray([[v * 1000 for v in coordutil.deg_to_xyz(
             lat, lon, coordutil.get_height(lat, lon, nan=0) - z_offset)] + [1] for lon, lat in point_map['lonlat']])
         # print(dst_xyz)
