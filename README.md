@@ -1,4 +1,4 @@
-# las-to-3d-tiles
+# lasto3dtiles
 
 ## installation
 
@@ -9,18 +9,21 @@ pip install .
 
 ## example
 
+[Example notebook on Google Collaboratory](https://colab.research.google.com/drive/1_A1Hy0z0nvt020deqEq4JXyHxOqLV67Z#scrollTo=kjdoBHv06X_c)
 
 ### rasterize
+
 ```bash
 lasto3dtiles RasterizeLasSet --input-dir /path/to/lasdir --output-dir /path/to/rasterized --workers 4 --voxel-size 0.05 --skip-rate 0.5
 ```
 
 ### convert to 3dtiles pnts format
+
 ```bash
 lasto3dtiles LasSetTo3dTiles --input-dir /path/to/lasdir --point-map-def /path/to/pointmap.json --output-dir /path/to/3dtiles --workers 4 --voxel-size 0.05 --skip-rate 0.5
 ```
 
-### pointmap.json 
+### example for pointmap.json 
 
 ```json
 {
