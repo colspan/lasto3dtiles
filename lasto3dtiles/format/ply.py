@@ -63,8 +63,8 @@ def open3d2ndarray(data):
 
 
 def ndarray2open3d(data):
-    pcd = open3d.PointCloud()
-    pcd.points = open3d.Vector3dVector(data[:, 0:3])
+    pcd = open3d.geometry.PointCloud()
+    pcd.points = open3d.utility.Vector3dVector(data[:, 0:3])
     if data.shape[0] == 0:
         return pcd
     # detect color schema
@@ -81,5 +81,5 @@ def ndarray2open3d(data):
         for i in range(colors.shape[1]):
             colors[:, i] /= np.max(colors[:, i])
 
-    pcd.colors = open3d.Vector3dVector(colors)
+    pcd.colors = open3d.utility.Vector3dVector(colors)
     return pcd

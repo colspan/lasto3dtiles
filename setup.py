@@ -20,7 +20,7 @@ setup(
         'pandas',
         'pillow',
         'pymap3d',
-        'open3d-python',
+        'open3d',
         'requests',
         'transforms3d',
     ],
